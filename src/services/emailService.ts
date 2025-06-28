@@ -27,15 +27,25 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
   try {
     // Check if email is configured
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-      console.log(`Email would be sent to ${options.to} (Email service not configured)`);
-      console.log(`Subject: ${options.subject}`);
+      console.log("\n" + "📧".repeat(40));
+      console.log("📧 EMAIL SERVICE (Development Mode - Not Configured)");
+      console.log("📧".repeat(40));
+      console.log(`📬 To: ${options.to}`);
+      console.log(`📝 Subject: ${options.subject}`);
+      console.log(`🔧 Status: Email service not configured`);
+      console.log(
+        `💡 Configure EMAIL_USER and EMAIL_PASSWORD to send real emails`
+      );
+      console.log("📧".repeat(40) + "\n");
       return;
     }
 
     const transporter = createTransporter();
 
     const mailOptions = {
-      from: `"${process.env.EMAIL_FROM_NAME || 'DigiPlot Property Management'}" <${process.env.EMAIL_FROM || 'noreply@digiplot.com'}>`,
+      from: `"${
+        process.env.EMAIL_FROM_NAME || "DigiPlot Property Management"
+      }" <${process.env.EMAIL_FROM || "noreply@digiplot.com"}>`,
       to: options.to,
       subject: options.subject,
       html: options.html,
@@ -43,7 +53,15 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`Email sent successfully to ${options.to}`);
+
+    // Enhanced success logging
+    console.log("\n" + "✉️".repeat(40));
+    console.log("✉️ EMAIL SENT SUCCESSFULLY");
+    console.log("✉️".repeat(40));
+    console.log(`📬 To: ${options.to}`);
+    console.log(`📝 Subject: ${options.subject}`);
+    console.log(`🕒 Sent at: ${new Date().toLocaleString()}`);
+    console.log("✉️".repeat(40) + "\n");
   } catch (error) {
     console.error("Error sending email:", error);
     throw new Error("Failed to send email");
@@ -58,7 +76,9 @@ export const sendPasswordResetEmail = async (
   resetToken: string,
   firstName: string
 ): Promise<void> => {
-  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+  const resetUrl = `${
+    process.env.FRONTEND_URL || "http://localhost:3000"
+  }/reset-password/${resetToken}`;
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -190,12 +210,23 @@ export const sendPasswordResetEmail = async (
     DigiPlot Property Management
   `;
 
-  // Log email content if not configured for actual sending
+  // Enhanced development logging when email is not configured
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-    console.log("=== PASSWORD RESET EMAIL (Not sent - Email not configured) ===");
-    console.log(`To: ${email}`);
-    console.log(`Reset URL: ${resetUrl}`);
-    console.log("=== END EMAIL ===");
+    console.log("\n" + "=".repeat(80));
+    console.log(
+      "🚀 DEVELOPMENT: PASSWORD RESET EMAIL (Email service not configured)"
+    );
+    console.log("=".repeat(80));
+    console.log(`📧 To: ${email}`);
+    console.log(`👤 User: ${firstName}`);
+    console.log(`🔑 Reset Token: ${resetToken}`);
+    console.log(`🔗 Reset URL: ${resetUrl}`);
+    console.log(`⏰ Expires: 1 hour from now`);
+    console.log("=".repeat(80));
+    console.log(
+      "💡 Copy the Reset URL above and open it in your browser to test!"
+    );
+    console.log("=".repeat(80) + "\n");
   }
 
   await sendEmail({

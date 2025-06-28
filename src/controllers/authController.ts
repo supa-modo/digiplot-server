@@ -398,6 +398,19 @@ export const forgotPassword = async (
     user.resetPasswordExpires = resetTokenExpiry;
     await user.save();
 
+    // Development logging for password reset token
+    if (process.env.NODE_ENV === "development") {
+      console.log("\n" + "🔐".repeat(40));
+      console.log("🔑 PASSWORD RESET TOKEN GENERATED (Development Mode)");
+      console.log("🔐".repeat(40));
+      console.log(`📧 Email: ${user.email}`);
+      console.log(`👤 User ID: ${user.id}`);
+      console.log(`🎯 Token: ${resetToken}`);
+      console.log(`⏰ Expires: ${resetTokenExpiry.toISOString()}`);
+      console.log(`🕒 Local Time: ${resetTokenExpiry.toLocaleString()}`);
+      console.log("🔐".repeat(40) + "\n");
+    }
+
     // Send password reset email
     try {
       await sendPasswordResetEmail(user.email, resetToken, user.firstName);
@@ -438,6 +451,16 @@ export const resetPassword = async (
 ): Promise<void> => {
   try {
     const { token, newPassword } = req.body;
+
+    // Development logging for password reset attempt
+    if (process.env.NODE_ENV === "development") {
+      console.log("\n" + "🔄".repeat(40));
+      console.log("🔄 PASSWORD RESET ATTEMPT (Development Mode)");
+      console.log("🔄".repeat(40));
+      console.log(`🎯 Token Received: ${token}`);
+      console.log(`🕒 Attempt Time: ${new Date().toLocaleString()}`);
+      console.log("🔄".repeat(40));
+    }
 
     // Find user by reset token
     const user = await User.findOne({
@@ -483,6 +506,18 @@ export const resetPassword = async (
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
     await user.save();
+
+    // Development logging for successful password reset
+    if (process.env.NODE_ENV === "development") {
+      console.log("\n" + "✅".repeat(40));
+      console.log("✅ PASSWORD RESET SUCCESSFUL (Development Mode)");
+      console.log("✅".repeat(40));
+      console.log(`📧 Email: ${user.email}`);
+      console.log(`👤 User ID: ${user.id}`);
+      console.log(`🕒 Reset Time: ${new Date().toLocaleString()}`);
+      console.log("💡 User can now login with new password!");
+      console.log("✅".repeat(40) + "\n");
+    }
 
     logger.info(`Password reset successful for user: ${user.email}`);
 
