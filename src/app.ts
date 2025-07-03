@@ -15,6 +15,11 @@ import "./models";
 // Import routes
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
+import propertyRoutes from "./routes/propertyRoutes";
+import unitRoutes from "./routes/unitRoutes";
+import tenantRoutes from "./routes/tenantRoutes";
+import paymentRoutes from "./routes/paymentRoutes";
+import maintenanceRoutes from "./routes/maintenanceRoutes";
 
 // Import middleware
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
@@ -119,11 +124,22 @@ app.use("/api/auth", authRoutes);
 // User management routes (Admin only)
 app.use("/api/users", userRoutes);
 
-// TODO: Add more API routes here
-// app.use('/api/properties', propertyRoutes);
-// app.use('/api/units', unitRoutes);
-// app.use('/api/payments', paymentRoutes);
-// app.use('/api/maintenance', maintenanceRoutes);
+// Property management routes
+app.use("/api/properties", propertyRoutes);
+
+// Unit management routes
+app.use("/api/units", unitRoutes);
+
+// Tenant management routes
+app.use("/api/tenants", tenantRoutes);
+
+// Payment management routes
+app.use("/api/payments", paymentRoutes);
+
+// Maintenance request routes
+app.use("/api/maintenance", maintenanceRoutes);
+
+// All core API routes completed!
 
 // 404 handler for unknown routes
 app.use(notFoundHandler);
@@ -157,13 +173,22 @@ const startServer = async () => {
       return;
     }
 
+    // Initialize models
+    logger.info("Initializing database models...");
+
+    // Import all models to ensure they are registered
+    const models = await import("./models");
+
     // Sync database (only in development)
     if (process.env.NODE_ENV === "development") {
-      await sequelize.sync({ alter: true });
-      logger.info("Database synchronized successfully.");
-
-      // Seed initial data in development
-      await seedInitialData();
+      try {
+        // Use alter: true instead of force: true to preserve data
+        await sequelize.sync({ alter: true });
+        logger.info("✅ Database models synchronized successfully");
+      } catch (syncError) {
+        logger.error("Failed to sync database models:", syncError);
+        // Continue starting the server even if sync fails
+      }
     }
 
     // Start server with full functionality

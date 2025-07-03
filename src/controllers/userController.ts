@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { User } from "../models";
-import { AuthenticatedRequest } from "../middleware/auth";
+import { AuthenticatedRequest } from "../types";
 import logger from "../config/logger";
 import { Op } from "sequelize";
 
@@ -329,7 +329,7 @@ export const deleteUser = async (
 
     // Prevent admin from deleting themselves
     const authenticatedReq = req as AuthenticatedRequest;
-    if (authenticatedReq.user.id === id) {
+    if (authenticatedReq.user && authenticatedReq.user.id === id) {
       res.status(400).json({
         success: false,
         message: "Cannot delete your own account",

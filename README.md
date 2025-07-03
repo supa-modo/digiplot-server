@@ -277,3 +277,163 @@ For support and questions:
 ---
 
 **Current Status:** Phase 1 Complete - Backend foundation is ready for authentication and model implementation.
+
+## Setup Instructions
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Create a `.env` file in the backend directory with the following variables:
+
+```bash
+# Database
+DATABASE_URL=postgresql://user:pass@host:port/db
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=digiplot
+DB_USER=postgres
+DB_PASSWORD=your_password
+
+# Server
+PORT=5000
+NODE_ENV=development
+API_BASE_URL=http://localhost:5000
+
+# JWT
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRE=1h
+REFRESH_TOKEN_SECRET=your_refresh_token_secret
+
+# M-Pesa Integration
+MPESA_CONSUMER_KEY=your_consumer_key
+MPESA_CONSUMER_SECRET=your_consumer_secret
+MPESA_SHORTCODE=your_shortcode
+MPESA_PASSKEY=your_passkey
+MPESA_ENV=sandbox # or production
+MPESA_WEBHOOK_SECRET=your_webhook_secret # Optional, for callback validation
+```
+
+3. Create the database:
+
+```bash
+createdb digiplot
+```
+
+4. Run migrations:
+
+```bash
+npx sequelize-cli db:migrate
+```
+
+5. Seed initial data:
+
+```bash
+npm run seed
+```
+
+6. Start the development server:
+
+```bash
+npm run dev
+```
+
+## M-Pesa Integration
+
+The system uses M-Pesa's STK Push API for payment processing. To set up M-Pesa integration:
+
+1. Register for a Safaricom Developer Account at https://developer.safaricom.co.ke/
+
+2. Create a new app and get your credentials:
+
+   - Consumer Key
+   - Consumer Secret
+   - Shortcode (test shortcode for sandbox)
+   - Passkey
+
+3. Configure your callback URL in the Safaricom developer portal:
+
+   - For development: `http://localhost:5000/api/payments/mpesa/callback`
+   - For production: `https://your-domain.com/api/payments/mpesa/callback`
+
+4. Update your `.env` file with the M-Pesa credentials
+
+### Testing M-Pesa Integration
+
+1. In sandbox mode, use the following test credentials:
+
+   - Phone number: 254708374149
+   - Test amount: Any amount
+   - PIN: 12345
+
+2. Make a test payment:
+
+```bash
+curl -X POST http://localhost:5000/api/payments \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your_token" \
+  -d '{
+    "tenantId": "tenant_id",
+    "unitId": "unit_id",
+    "amount": 1000,
+    "paymentMethod": "mpesa",
+    "phoneNumber": "254708374149",
+    "description": "Test payment"
+  }'
+```
+
+3. Monitor the logs for callback processing
+
+## Available Scripts
+
+- `npm run build`: Build the TypeScript code
+- `npm start`: Start the production server
+- `npm run dev`: Start the development server with hot reload
+- `npm run seed`: Seed the database with initial data
+
+## API Documentation
+
+See the [BACKEND_ARCHITECTURE.md](./BACKEND_ARCHITECTURE.md) file for detailed API documentation.
+
+## Security Notes
+
+1. Always use HTTPS in production
+2. Keep your M-Pesa credentials secure
+3. Validate all M-Pesa callbacks using the webhook secret
+4. Monitor payment reconciliation logs
+5. Implement proper error handling for failed payments
+
+## Troubleshooting
+
+1. **M-Pesa Callback Issues**
+
+   - Check the callback URL is correctly configured
+   - Ensure the server is accessible from the internet
+   - Verify webhook secret if configured
+   - Check server logs for detailed error messages
+
+2. **Payment Status Issues**
+
+   - Check the payment logs
+   - Verify M-Pesa transaction ID
+   - Check callback processing status
+   - Ensure database connection is stable
+
+3. **Database Issues**
+   - Verify database connection settings
+   - Check if migrations are up to date
+   - Ensure proper permissions for the database user
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

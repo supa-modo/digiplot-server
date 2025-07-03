@@ -5,7 +5,7 @@ import {
   generatePasswordResetToken,
   verifyPasswordResetToken,
 } from "../utils/auth";
-import { AuthenticatedRequest } from "../middleware/auth";
+import { AuthenticatedRequest } from "../types";
 import logger from "../config/logger";
 import twoFactorService from "../services/twoFactorService";
 import { sendPasswordResetEmail } from "../services/emailService";
@@ -91,7 +91,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!user) {
       res.status(401).json({
         success: false,
-        message: "Invalid email or password",
+        message:
+          "Invalid email or password. Check your credentials.",
       });
       return;
     }
@@ -122,7 +123,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       await user.incrementFailedLogins();
       res.status(401).json({
         success: false,
-        message: "Invalid email or password",
+        message:
+          "Invalid email or password. Check your credentials.",
       });
       return;
     }
@@ -147,7 +149,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       if (!is2FAValid) {
         res.status(401).json({
           success: false,
-          message: "Invalid two-factor authentication code",
+          message:
+            "Invalid two-factor authentication code. Please check your authenticator app and try again.",
         });
         return;
       }
@@ -264,7 +267,7 @@ export const changePassword = async (
     if (!isCurrentPasswordValid) {
       res.status(400).json({
         success: false,
-        message: "Current password is incorrect",
+        message: "Current password is incorrect. Please check and try again.",
       });
       return;
     }
@@ -472,7 +475,7 @@ export const resetPassword = async (
     if (!user) {
       res.status(400).json({
         success: false,
-        message: "Invalid or expired reset token",
+        message: "Invalid or expired password reset link. Request again.",
       });
       return;
     }
@@ -487,7 +490,7 @@ export const resetPassword = async (
       res.status(400).json({
         success: false,
         message:
-          "Reset token has expired. Please request a new password reset.",
+          "Reset token has expired. Please request a new password reset link.",
       });
       return;
     }

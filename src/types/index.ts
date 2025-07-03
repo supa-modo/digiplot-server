@@ -161,14 +161,41 @@ export interface ITenantHistory {
   updated_at: Date;
 }
 
+// User instance type from Sequelize model (avoiding circular imports)
+export interface UserInstance {
+  id: string;
+  role: UserRole;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  status: UserStatus;
+  lastLogin?: Date;
+  resetPasswordToken?: string | null;
+  resetPasswordExpires?: Date | null;
+  twoFactorSecret?: string | null;
+  twoFactorEnabled?: boolean;
+  failedLoginAttempts?: number;
+  lockoutUntil?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  fullName: string;
+  comparePassword(candidatePassword: string): Promise<boolean>;
+  isLocked(): boolean;
+  incrementFailedLogins(): Promise<void>;
+  resetFailedLogins(): Promise<void>;
+  update(values: any): Promise<UserInstance>;
+  save(): Promise<UserInstance>;
+  toJSON(): any;
+  destroy(): Promise<void>;
+}
+
 // Extended Request interface with user
 export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    role: UserRole;
-    email: string;
-    full_name: string;
-  };
+  user?: UserInstance;
 }
 
 // API Response interface
