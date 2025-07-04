@@ -353,6 +353,8 @@ export const getAllPayments = async (
       where: whereClause,
       include: includeClause,
       order: [["paymentDate", "DESC"]],
+      distinct: true,
+      col: "Payment.id",
       limit: Number(limit),
       offset,
     });
