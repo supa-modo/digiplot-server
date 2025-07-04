@@ -5,6 +5,7 @@ export interface PaymentAttributes {
   id: string;
   tenantId?: string;
   unitId?: string;
+  leaseId?: string;
   amount: number;
   paymentDate: Date;
   mpesaTransactionId: string;
@@ -23,6 +24,7 @@ class Payment
   public id!: string;
   public tenantId?: string;
   public unitId?: string;
+  public leaseId?: string;
   public amount!: number;
   public paymentDate!: Date;
   public mpesaTransactionId!: string;
@@ -51,6 +53,14 @@ Payment.init(
       allowNull: true,
       references: {
         model: "units",
+        key: "id",
+      },
+    },
+    leaseId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "leases",
         key: "id",
       },
     },

@@ -20,6 +20,7 @@ import unitRoutes from "./routes/unitRoutes";
 import tenantRoutes from "./routes/tenantRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
 import maintenanceRoutes from "./routes/maintenanceRoutes";
+import leaseRoutes from "./routes/leaseRoutes";
 
 // Import middleware
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
@@ -138,6 +139,9 @@ app.use("/api/payments", paymentRoutes);
 
 // Maintenance request routes
 app.use("/api/maintenance", maintenanceRoutes);
+
+// Lease management routes
+app.use("/api/leases", leaseRoutes);
 
 // All core API routes completed!
 

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
-import { Payment, User, Unit, Property } from "../models";
+import { Payment, User, Unit, Property, Lease } from "../models";
 import { AuthenticatedRequest } from "../types";
 import logger from "../config/logger";
 import crypto from "crypto";
@@ -120,16 +120,34 @@ export const createPayment = async (
       return;
     }
 
+    // Find current active lease for this tenant-unit combination
+    const currentLease = await Lease.findOne({
+      where: {
+        tenantId,
+        unitId,
+        status: "active",
+      },
+    });
+
+    if (!currentLease) {
+      res.status(400).json({
+        success: false,
+        message: "No active lease found for this tenant-unit combination.",
+      });
+      return;
+    }
+
     // Generate unique transaction ID
     const transactionId = `TDGP_${Date.now()}_${crypto
       .randomBytes(4)
       .toString("hex")
       .toUpperCase()}`;
 
-    // Create payment record
+    // Create payment record with lease association
     const payment = await Payment.create({
       tenantId,
       unitId,
+      leaseId: currentLease.id,
       amount,
       mpesaTransactionId: transactionId,
       status: "pending",
@@ -275,6 +293,12 @@ export const getAllPayments = async (
             },
           ],
         },
+        {
+          model: Lease,
+          as: "lease",
+          attributes: ["id", "startDate", "endDate", "monthlyRent", "status"],
+          required: false,
+        },
       ];
     } else if (req.user?.role === "landlord") {
       // Landlords can see payments for their properties
@@ -296,6 +320,12 @@ export const getAllPayments = async (
               attributes: ["id", "name", "address"],
             },
           ],
+        },
+        {
+          model: Lease,
+          as: "lease",
+          attributes: ["id", "startDate", "endDate", "monthlyRent", "status"],
+          required: false,
         },
       ];
     }
